@@ -7,13 +7,13 @@ import { isMetricsEmpty, normalizeMetrics } from "../../api/endpoints/metrics.ap
 import { NoMetrics } from "../resource-metrics/no-metrics";
 import { IResourceMetricsValue, ResourceMetricsContext } from "../resource-metrics";
 import { _i18n } from "../../i18n";
-import { themeStore } from "../../theme.store";
+import { ThemeStore } from "../../theme.store";
 
 type IContext = IResourceMetricsValue<any, { metrics: IPodMetrics }>;
 
 export const ContainerCharts = observer(() => {
   const { params: { metrics }, tabId } = useContext<IContext>(ResourceMetricsContext);
-  const { chartCapacityColor } = themeStore.activeTheme.colors;
+  const { chartCapacityColor } = ThemeStore.getInstance().activeTheme.colors;
 
   if (!metrics) return null;
   if (isMetricsEmpty(metrics)) return <NoMetrics/>;

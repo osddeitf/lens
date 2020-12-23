@@ -7,7 +7,7 @@ import { Trans } from "@lingui/macro";
 import { Menu, MenuItem, MenuProps } from "../menu";
 import { Icon } from "../icon";
 import { observable } from "mobx";
-import { WorkspaceId, workspaceStore } from "../../../common/workspace-store";
+import { WorkspaceId, WorkspaceStore } from "../../../common/workspace-store";
 import { cssNames } from "../../utils";
 import { navigate } from "../../navigation";
 import { clusterViewURL } from "../cluster-manager/cluster-view.route";
@@ -21,9 +21,10 @@ export class WorkspaceMenu extends React.Component<Props> {
   @observable menuVisible = false;
 
   activateWorkspace = (id: WorkspaceId) => {
-    const clusterId = workspaceStore.getById(id).lastActiveClusterId;
+    const ws = WorkspaceStore.getInstance();
+    const clusterId = ws.getById(id).lastActiveClusterId;
 
-    workspaceStore.setActive(id);
+    ws.setActive(id);
 
     if (clusterId) {
       navigate(clusterViewURL({ params: { clusterId } }));
@@ -34,7 +35,7 @@ export class WorkspaceMenu extends React.Component<Props> {
 
   render() {
     const { className, ...menuProps } = this.props;
-    const { enabledWorkspacesList, currentWorkspace } = workspaceStore;
+    const { enabledWorkspacesList, currentWorkspace } = WorkspaceStore.getInstance();
 
     return (
       <Menu

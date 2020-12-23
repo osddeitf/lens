@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { computed, observable, toJS } from "mobx";
 import { t, Trans } from "@lingui/macro";
 import { WizardLayout } from "../layout/wizard-layout";
-import { Workspace, WorkspaceId, workspaceStore } from "../../../common/workspace-store";
+import { Workspace, WorkspaceId, WorkspaceStore } from "../../../common/workspace-store";
 import { v4 as uuid } from "uuid";
 import { _i18n } from "../../i18n";
 import { ConfirmDialog } from "../confirm-dialog";
@@ -13,7 +13,7 @@ import { Input } from "../input";
 import { cssNames, prevDefault } from "../../utils";
 import { Button } from "../button";
 import { isRequired, InputValidator } from "../input/input_validators";
-import { clusterStore } from "../../../common/cluster-store";
+import { ClusterStore } from "../../../common/cluster-store";
 
 @observer
 export class Workspaces extends React.Component {
@@ -22,7 +22,7 @@ export class Workspaces extends React.Component {
   @computed get workspaces(): Workspace[] {
     const currentWorkspaces: Map<WorkspaceId, Workspace> = new Map();
 
-    workspaceStore.enabledWorkspacesList.forEach((w) => {
+    WorkspaceStore.getInstance().enabledWorkspacesList.forEach((w) => {
       currentWorkspaces.set(w.id, w);
     });
     const allWorkspaces = new Map([
@@ -48,16 +48,17 @@ export class Workspaces extends React.Component {
   }
 
   saveWorkspace = (id: WorkspaceId) => {
+    const ws = WorkspaceStore.getInstance();
     const workspace = new Workspace(this.editingWorkspaces.get(id));
 
-    if (workspaceStore.getById(id)) {
-      workspaceStore.updateWorkspace(workspace);
+    if (ws.getById(id)) {
+      ws.updateWorkspace(workspace);
       this.clearEditing(id);
 
       return;
     }
 
-    if (workspaceStore.addWorkspace(workspace)) {
+    if (ws.addWorkspace(workspace)) {
       this.clearEditing(id);
     }
   };
@@ -73,16 +74,17 @@ export class Workspaces extends React.Component {
   };
 
   editWorkspace = (id: WorkspaceId) => {
-    const workspace = workspaceStore.getById(id);
+    const workspace = WorkspaceStore.getInstance().getById(id);
 
     this.editingWorkspaces.set(id, toJS(workspace));
   };
 
   activateWorkspace = (id: WorkspaceId) => {
-    const clusterId = workspaceStore.getById(id).lastActiveClusterId;
+    const ws = WorkspaceStore.getInstance();
+    const clusterId = ws.getById(id).lastActiveClusterId;
 
-    workspaceStore.setActive(id);
-    clusterStore.setActive(clusterId);
+    ws.setActive(id);
+    ClusterStore.getInstance().setActive(clusterId);
   };
 
   clearEditing = (id: WorkspaceId) => {
@@ -90,7 +92,7 @@ export class Workspaces extends React.Component {
   };
 
   removeWorkspace = (id: WorkspaceId) => {
-    const workspace = workspaceStore.getById(id);
+    const workspace = WorkspaceStore.getInstance().getById(id);
 
     ConfirmDialog.open({
       okButtonProps: {
@@ -100,7 +102,7 @@ export class Workspaces extends React.Component {
       },
       ok: () => {
         this.clearEditing(id);
-        workspaceStore.removeWorkspace(workspace);
+        WorkspaceStore.getInstance().removeWorkspace(workspace);
       },
       message: (
         <div className="confirm flex column gaps">
@@ -132,8 +134,8 @@ export class Workspaces extends React.Component {
         </h2>
         <div className="items flex column gaps">
           {this.workspaces.map(({ id: workspaceId, name, description, ownerRef }) => {
-            const isActive = workspaceStore.currentWorkspaceId === workspaceId;
-            const isDefault = workspaceStore.isDefault(workspaceId);
+            const isActive = WorkspaceStore.getInstance().currentWorkspaceId === workspaceId;
+            const isDefault = WorkspaceStore.getInstance().isDefault(workspaceId);
             const isEditing = this.editingWorkspaces.has(workspaceId);
             const editingWorkspace = this.editingWorkspaces.get(workspaceId);
             const managed = !!ownerRef;
@@ -144,7 +146,7 @@ export class Workspaces extends React.Component {
             });
             const existenceValidator: InputValidator = {
               message: () => `Workspace '${name}' already exists`,
-              validate: value => !workspaceStore.getByName(value.trim())
+              validate: value => !WorkspaceStore.getInstance().getByName(value.trim())
             };
 
             return (

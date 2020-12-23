@@ -4,19 +4,19 @@ import React from "react";
 import * as Mobx from "mobx";
 import * as MobxReact from "mobx-react";
 import { render, unmountComponentAtNode } from "react-dom";
-import { clusterStore } from "../common/cluster-store";
-import { userStore } from "../common/user-store";
+import { ClusterStore } from "../common/cluster-store";
+import { UserStore } from "../common/user-store";
 import { isMac } from "../common/vars";
-import { workspaceStore } from "../common/workspace-store";
+import { WorkspaceStore } from "../common/workspace-store";
 import * as LensExtensions from "../extensions/extension-api";
-import { extensionDiscovery } from "../extensions/extension-discovery";
-import { extensionLoader } from "../extensions/extension-loader";
-import { extensionsStore } from "../extensions/extensions-store";
-import { filesystemProvisionerStore } from "../main/extension-filesystem";
+import { ExtensionDiscovery } from "../extensions/extension-discovery";
+import { ExtensionLoader } from "../extensions/extension-loader";
+import { ExtensionsStore } from "../extensions/extensions-store";
+import { FilesystemProvisionerStore } from "../main/extension-filesystem";
 import { App } from "./components/app";
-import { i18nStore } from "./i18n";
+import { LocalizationStore } from "./i18n";
 import { LensApp } from "./lens-app";
-import { themeStore } from "./theme.store";
+import { ThemeStore } from "./theme.store";
 
 type AppComponent = React.ComponentType & {
   init?(): Promise<void>;
@@ -34,17 +34,25 @@ export async function bootstrap(App: AppComponent) {
 
   rootElem.classList.toggle("is-mac", isMac);
 
-  extensionLoader.init();
-  extensionDiscovery.init();
+  ExtensionLoader.getInstanceOrCreate().init();
+  ExtensionDiscovery.getInstanceOrCreate().init();
+
+  const userStore = UserStore.getInstanceOrCreate();
+  const clusterStore = ClusterStore.getInstanceOrCreate();
+  const workspaceStore = WorkspaceStore.getInstanceOrCreate();
+  const extensionsStore = ExtensionsStore.getInstanceOrCreate();
+  const filesystemStore = FilesystemProvisionerStore.getInstanceOrCreate();
+  const localizationStore = LocalizationStore.getInstanceOrCreate();
+  const themeStore = ThemeStore.getInstanceOrCreate();
 
   // preload common stores
   await Promise.all([
     userStore.load(),
-    workspaceStore.load(),
     clusterStore.load(),
+    workspaceStore.load(),
     extensionsStore.load(),
-    filesystemProvisionerStore.load(),
-    i18nStore.init(),
+    filesystemStore.load(),
+    localizationStore.init(),
     themeStore.init(),
   ]);
 
@@ -58,9 +66,9 @@ export async function bootstrap(App: AppComponent) {
   }
   window.addEventListener("message", (ev: MessageEvent) => {
     if (ev.data === "teardown") {
-      userStore.unregisterIpcListener();
-      workspaceStore.unregisterIpcListener();
-      clusterStore.unregisterIpcListener();
+      UserStore.getInstance(false)?.unregisterIpcListener();
+      WorkspaceStore.getInstance(false)?.unregisterIpcListener();
+      ClusterStore.getInstance(false)?.unregisterIpcListener();
       unmountComponentAtNode(rootElem);
       window.location.href = "about:blank";
     }

@@ -15,7 +15,7 @@ import { systemName, isUrl, isPath } from "../input/input_validators";
 import { SubTitle } from "../layout/sub-title";
 import { Icon } from "../icon";
 import { Notifications } from "../notifications";
-import { HelmRepo, repoManager } from "../../../main/helm/helm-repo-manager";
+import { HelmRepo, HelmRepoManager } from "../../../main/helm/helm-repo-manager";
 
 interface Props extends Partial<DialogProps> {
   onAddRepo: Function
@@ -81,7 +81,7 @@ export class AddHelmRepoDialog extends React.Component<Props> {
 
   async addCustomRepo() {
     try {
-      await repoManager.addСustomRepo(this.helmRepo);
+      await HelmRepoManager.getInstance().addСustomRepo(this.helmRepo);
       Notifications.ok(<Trans>Helm repository <b>{this.helmRepo.name}</b> has added</Trans>);
       this.props.onAddRepo();
       this.close();

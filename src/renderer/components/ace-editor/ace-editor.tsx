@@ -7,7 +7,7 @@ import { reaction } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import AceBuild, { Ace } from "ace-builds";
 import { autobind, cssNames, noop } from "../../utils";
-import { themeStore } from "../../theme.store";
+import { ThemeStore } from "../../theme.store";
 
 interface Props extends Partial<Ace.EditorOptions> {
   className?: string;
@@ -52,12 +52,12 @@ export class AceEditor extends React.Component<Props, State> {
   }
 
   @disposeOnUnmount
-  themeSwitcher = reaction(() => themeStore.activeTheme, () => {
+  themeSwitcher = reaction(() => ThemeStore.getInstance().activeTheme, () => {
     this.setTheme(this.theme);
   });
 
   get theme() {
-    switch (themeStore.activeTheme.type) {
+    switch (ThemeStore.getInstance().activeTheme.type) {
       case "light":
         return "dreamweaver";
       case "dark":

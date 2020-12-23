@@ -2,7 +2,7 @@ import "@testing-library/jest-dom/extend-expect";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import fse from "fs-extra";
 import React from "react";
-import { extensionDiscovery } from "../../../../extensions/extension-discovery";
+import { ExtensionDiscovery } from "../../../../extensions/extension-discovery";
 import { ConfirmDialog } from "../../confirm-dialog";
 import { Notifications } from "../../notifications";
 import { ExtensionStateStore } from "../extension-install.store";
@@ -20,10 +20,12 @@ jest.mock("../../../../common/utils", () => ({
 
 jest.mock("../../../../extensions/extension-discovery", () => ({
   ...jest.requireActual("../../../../extensions/extension-discovery"),
-  extensionDiscovery: {
-    localFolderPath: "/fake/path",
-    uninstallExtension: jest.fn(() => Promise.resolve()),
-    isLoaded: true
+  ExtensionDiscovery: {
+    getInstance: () => ({
+      localFolderPath: "/fake/path",
+      uninstallExtension: jest.fn(() => Promise.resolve()),
+      isLoaded: true
+    })
   }
 }));
 
@@ -68,13 +70,13 @@ describe("Extensions", () => {
     // Approve confirm dialog
     fireEvent.click(screen.getByText("Yes"));
 
-    expect(extensionDiscovery.uninstallExtension).toHaveBeenCalled();
+    expect(ExtensionDiscovery.getInstance().uninstallExtension).toHaveBeenCalled();
     expect(screen.getByText("Disable").closest("button")).toBeDisabled();
     expect(screen.getByText("Uninstall").closest("button")).toBeDisabled();
   });
 
   it("displays error notification on uninstall error", () => {
-    (extensionDiscovery.uninstallExtension as any).mockImplementationOnce(() =>
+    (ExtensionDiscovery.getInstance().uninstallExtension as any).mockImplementationOnce(() =>
       Promise.reject()
     );
     render(<><Extensions /><ConfirmDialog/></>);
@@ -115,14 +117,14 @@ describe("Extensions", () => {
   });
 
   it("displays spinner while extensions are loading", () => {
-    extensionDiscovery.isLoaded = false;
+    ExtensionDiscovery.getInstance().isLoaded = false;
     const { container } = render(<Extensions />);
 
     expect(container.querySelector(".Spinner")).toBeInTheDocument();
 
-    extensionDiscovery.isLoaded = true;
+    ExtensionDiscovery.getInstance().isLoaded = true;
 
-    waitFor(() => 
+    waitFor(() =>
       expect(container.querySelector(".Spinner")).not.toBeInTheDocument()
     );
   });

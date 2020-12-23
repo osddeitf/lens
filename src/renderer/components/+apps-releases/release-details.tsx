@@ -21,7 +21,7 @@ import { releaseStore } from "./release.store";
 import { Notifications } from "../notifications";
 import { createUpgradeChartTab } from "../dock/upgrade-chart.store";
 import { _i18n } from "../../i18n";
-import { themeStore } from "../../theme.store";
+import { ThemeStore } from "../../theme.store";
 import { apiManager } from "../../api/api-manager";
 import { SubTitle } from "../layout/sub-title";
 import { secretsStore } from "../+config-secrets/secrets.store";
@@ -243,7 +243,7 @@ export class ReleaseDetails extends Component<Props> {
 
     return (
       <Drawer
-        className={cssNames("ReleaseDetails", themeStore.activeTheme.type)}
+        className={cssNames("ReleaseDetails", ThemeStore.getInstance().activeTheme.type)}
         usePortal={true}
         open={!!release}
         title={title}

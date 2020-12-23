@@ -2,7 +2,7 @@ import moment from "moment";
 import { observable, reaction } from "mobx";
 import { setupI18n } from "@lingui/core";
 import orderBy from "lodash/orderBy";
-import { autobind, createStorage } from "./utils";
+import { autobind, createStorage, Singleton } from "./utils";
 
 const plurals: Record<string, Function> = require("make-plural/plurals"); // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -20,7 +20,7 @@ export const _i18n = setupI18n({
 });
 
 @autobind()
-export class LocalizationStore {
+export class LocalizationStore extends Singleton {
   readonly defaultLocale = "en";
   @observable activeLang = this.defaultLocale;
 
@@ -32,6 +32,8 @@ export class LocalizationStore {
   ], "title");
 
   constructor() {
+    super();
+
     const storage = createStorage("lang_ui", this.defaultLocale);
 
     this.activeLang = storage.get();
@@ -55,5 +57,3 @@ export class LocalizationStore {
     await _i18n.activate(locale);
   }
 }
-
-export const i18nStore = new LocalizationStore();
